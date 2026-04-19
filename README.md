@@ -1,4 +1,4 @@
-# Unified AI Agent - Kimi Orchestrator
+# Unified AI Agent - mini-ai
 
 A sophisticated multi-provider AI agent system that seamlessly integrates **Google Gemini 2.5 Flash** and **Anthropic Claude** APIs, with **Kimi (Moonshot AI)** serving as the intelligent orchestrator.
 
@@ -156,7 +156,7 @@ python unified_ai_agent.py --share
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     Kimi Orchestrator                        │
+│                     mini-ai                        │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │  Task Router → Agent Selector → Response Synthesizer │   │
 │  └─────────────────────────────────────────────────────┘   │

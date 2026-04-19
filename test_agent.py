@@ -16,7 +16,7 @@ def test_imports():
     print("Testing imports...")
     
     tests = [
-        ("google.generativeai", "Google Generative AI"),
+        ("google.genai", "Google GenAI"),
         ("anthropic", "Anthropic"),
         ("langchain", "LangChain"),
         ("langchain_community", "LangChain Community"),

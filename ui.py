@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-UI Module — Antigravity AI Standalone Web Server
+UI Module — mini-ai Standalone Web Server
 ==================================================
 Serves frontend/index.html (pure HTML/CSS/JS) and exposes three REST
 endpoints that the JavaScript frontend calls:
@@ -46,7 +46,7 @@ def _run_async(coro):
 
 # ─────────────────────────────────────────────────────────────────────────────
 class _Handler(BaseHTTPRequestHandler):
-    """Minimal HTTP request handler for the Antigravity AI backend."""
+    """Minimal HTTP request handler for the mini-ai backend."""
 
     # Injected by GradioInterface before the server starts
     orchestrator = None
@@ -128,7 +128,7 @@ class GradioInterface:
     Drop-in replacement for the old Gradio-based interface.
 
     Starts a pure-Python HTTP server that:
-      • serves  frontend/index.html  (the Antigravity-themed UI)
+      • serves  frontend/index.html  (the mini-ai-themed UI)
       • exposes /api/chat, /api/status, /api/clear REST endpoints
 
     Usage (same call-site as before):
@@ -160,7 +160,7 @@ class GradioInterface:
 
         server = HTTPServer((server_name, server_port), _Handler)
 
-        print(f"\n  🚀  Antigravity AI  ›  {url}")
+        print(f"\n  🚀  mini-ai  ›  {url}")
         print(  "      Press Ctrl+C to stop\n")
 
         if inbrowser:

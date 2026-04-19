@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Unified AI Agent - Kimi Orchestrator
+Unified AI Agent - mini-ai
 =====================================
 A multi-provider AI agent system that integrates Gemini and Claude APIs
 with Kimi (Moonshot AI) as the primary orchestrator.
@@ -28,6 +28,11 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 from abc import ABC, abstractmethod
 import traceback
+import warnings
+
+# Suppress deprecation warnings
+warnings.filterwarnings("ignore", category=FutureWarning, module="google.generativeai")
+warnings.filterwarnings("ignore", message=".*Pydantic V1.*")
 
 # Configure logging
 logging.basicConfig(
@@ -46,7 +51,7 @@ def check_dependencies():
     optional_missing = []
     
     required = {
-        'google.generativeai': 'google-generativeai>=0.8.0',
+        'google.genai': 'google-genai>=0.1.0',
         'anthropic': 'anthropic>=0.30.0',
         'langchain': 'langchain>=0.2.0',
         'langchain_community': 'langchain-community>=0.2.0',
@@ -87,12 +92,12 @@ def check_dependencies():
 # =============================================================================
 
 try:
-    import google.generativeai as genai
-    from google.generativeai.types import GenerationConfig
+    from google import genai
+    from google.genai import types
     GEMINI_AVAILABLE = True
 except ImportError:
     GEMINI_AVAILABLE = False
-    logger.warning("Google Generative AI not available. Gemini features disabled.")
+    logger.warning("Google GenAI not available. Gemini features disabled.")
 
 try:
     from anthropic import Anthropic
@@ -245,16 +250,15 @@ class GeminiAgent(BaseAgent):
             return
         
         try:
-            genai.configure(api_key=api_key)
-            self.client = genai
-            self.model = genai.GenerativeModel(self.config.gemini_model)
+            self.client = genai.Client(api_key=api_key)
+            self.model = self.config.gemini_model
             logger.info(f"Gemini agent initialized with model: {self.config.gemini_model}")
         except Exception as e:
             logger.error(f"Failed to initialize Gemini: {e}")
     
     def is_available(self) -> bool:
         """Check if Gemini is available."""
-        return GEMINI_AVAILABLE and self.model is not None
+        return GEMINI_AVAILABLE and self.client is not None
     
     async def generate(self, prompt: str, context: Optional[str] = None,
                        task_type: TaskType = TaskType.CHAT) -> AgentResponse:
@@ -276,9 +280,10 @@ class GeminiAgent(BaseAgent):
             
             # Generate response
             response = await asyncio.to_thread(
-                self.model.generate_content,
-                full_prompt,
-                generation_config=generation_config
+                self.client.models.generate_content,
+                model=self.model,
+                contents=full_prompt,
+                config=generation_config
             )
             
             return AgentResponse(
@@ -326,23 +331,23 @@ class GeminiAgent(BaseAgent):
         }
         return instructions.get(task_type, instructions[TaskType.CHAT])
     
-    def _get_generation_config(self, task_type: TaskType) -> GenerationConfig:
+    def _get_generation_config(self, task_type: TaskType):
         """Get generation configuration based on task type."""
         configs = {
-            TaskType.CODE_GENERATION: GenerationConfig(
+            TaskType.CODE_GENERATION: types.GenerateContentConfig(
                 temperature=0.2,
                 max_output_tokens=8192,
             ),
-            TaskType.ANALYSIS: GenerationConfig(
+            TaskType.ANALYSIS: types.GenerateContentConfig(
                 temperature=0.3,
                 max_output_tokens=4096,
             ),
-            TaskType.SUMMARIZATION: GenerationConfig(
+            TaskType.SUMMARIZATION: types.GenerateContentConfig(
                 temperature=0.5,
                 max_output_tokens=2048,
             ),
         }
-        return configs.get(task_type, GenerationConfig(
+        return configs.get(task_type, types.GenerateContentConfig(
             temperature=0.7,
             max_output_tokens=4096,
         ))
@@ -615,9 +620,9 @@ class RAGSystem:
 # KIMI ORCHESTRATOR
 # =============================================================================
 
-class KimiOrchestrator:
+class miniAIOrchestrator:
     """
-    Kimi Orchestrator - The central coordinator for the multi-agent system.
+    mini-ai - The central coordinator for the multi-agent system.
     
     Responsibilities:
     - Route tasks to the appropriate agent based on task type and availability
@@ -642,7 +647,7 @@ class KimiOrchestrator:
         # Register default tools
         self._register_default_tools()
         
-        logger.info("Kimi Orchestrator initialized")
+        logger.info("mini-ai initialized")
     
     def _register_default_tools(self):
         """Register default available tools."""
@@ -676,7 +681,7 @@ class KimiOrchestrator:
     def _tool_get_status(self) -> str:
         """Tool: Get system status."""
         status = []
-        status.append(f"Kimi Orchestrator Status:")
+        status.append(f"mini-ai Status:")
         status.append(f"  - Gemini Agent: {'✓' if self.gemini_agent.is_available() else '✗'}")
         status.append(f"  - Claude Agent: {'✓' if self.claude_agent.is_available() else '✗'}")
         status.append(f"  - RAG System: {'✓' if self.rag_system and self.rag_system.is_initialized else '✗'}")
@@ -820,7 +825,7 @@ class KimiOrchestrator:
 def run_cli(orchestrator: KimiOrchestrator):
     """Run the command-line interface."""
     print("=" * 70)
-    print("🤖 Unified AI Agent - Kimi Orchestrator (CLI Mode)")
+    print("🤖 Unified AI Agent - mini-ai (CLI Mode)")
     print("=" * 70)
     print("\nCommands:")
     print("  /status  - Show system status")
@@ -887,7 +892,7 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(
-        description="Unified AI Agent - Kimi Orchestrator",
+        description="Unified AI Agent - mini-ai",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Environment Variables:
@@ -947,8 +952,8 @@ Examples:
     )
     
     # Initialize orchestrator
-    print("🚀 Initializing Kimi Orchestrator...")
-    orchestrator = KimiOrchestrator(config)
+    print("🚀 Initializing mini-ai...")
+    orchestrator = miniAIOrchestrator(config)
     
     # Check if any agents are available
     status = orchestrator.get_status()

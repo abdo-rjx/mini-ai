@@ -125,7 +125,7 @@ def test_imports():
     print("\n🧪 Testing imports...")
     
     imports = [
-        ("google.generativeai", "Gemini API"),
+        ("google.genai", "Gemini API"),
         ("anthropic", "Claude API"),
         ("langchain", "LangChain"),
         ("faiss", "FAISS"),
